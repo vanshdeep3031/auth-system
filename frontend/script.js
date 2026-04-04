@@ -1,4 +1,4 @@
-const API = "http://localhost:8000/api";
+const API = "https://authorisation-1fun.onrender.com/api";
 
 // REGISTER
 async function register() {
@@ -30,7 +30,7 @@ async function login() {
 
   // 2FA case
   if (data.userId) {
-    const otp = prompt("Enter OTP from Google Authenticator");
+    const otp = prompt("Enter OTP");
 
     const verify = await fetch(`${API}/auth/2fa/login`, {
       method: "POST",
@@ -50,7 +50,7 @@ async function login() {
   window.location.href = "dashboard.html";
 }
 
-// LOAD DASHBOARD
+// DASHBOARD
 async function loadDashboard() {
   const token = localStorage.getItem("token");
 
