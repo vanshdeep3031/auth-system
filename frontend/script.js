@@ -1,53 +1,63 @@
-const API = "https://authorisation-1fun.onrender.com/api";
+const API = "http://localhost:8000/api/auth";
 
-// REGISTER
+// 🔹 REGISTER
 async function register() {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
-  const res = await fetch(`${API}/auth/register`, {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({ email, password })
-  });
+  const msg = document.getElementById("message");
+  msg.innerText = "Processing...";
 
-  const data = await res.json();
+  try {
+    const res = await fetch(`${API}/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
+    });
 
-  document.getElementById("message").innerText = data.message;
+    const data = await res.json();
 
-  // 🔥 Redirect to login after success
-  if (res.status === 201 || data.message) {
+    if (!res.ok) throw new Error(data.message);
+
+    msg.innerText = "Registered successfully! Redirecting...";
+
     setTimeout(() => {
       window.location.href = "index.html";
     }, 1500);
+
+  } catch (err) {
+    msg.innerText = err.message;
   }
 }
 
-// LOGIN
+// 🔹 LOGIN
 async function login() {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
-  const res = await fetch(`${API}/auth/login`, {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({ email, password })
-  });
+  const msg = document.getElementById("message");
+  msg.innerText = "Processing...";
 
-  const data = await res.json();
+  try {
+    const res = await fetch(`${API}/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
+    });
 
-  if (data.accessToken) {
-    localStorage.setItem("token", data.accessToken);
+    const data = await res.json();
 
-    // 🔥 Redirect to dashboard
-    window.location.href = "dashboard.html";
-  } else {
-    document.getElementById("message").innerText = data.message;
+    if (!res.ok) throw new Error(data.message);
+
+    localStorage.setItem("token", data.token);
+
+    msg.innerText = "Login successful! Redirecting...";
+
+    setTimeout(() => {
+      window.location.href = "dashboard.html";
+    }, 1500);
+
+  } catch (err) {
+    msg.innerText = err.message;
   }
-}
-
-// LOGOUT
-function logout() {
-  localStorage.removeItem("token");
-  window.location.href = "index.html";
 }

@@ -1,25 +1,61 @@
 import express from "express";
-import {
-  register,
-  login,
-  refreshAccessToken,
-  logout,
-  generate2FA,
-  verify2FA,
-  verifyLogin2FA
-} from "../controllers/authController.js";
-
-import authMiddleware from "../middleware/authMiddleware.js";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
 const router = express.Router();
 
-router.post("/register", register);
-router.post("/login", login);
-router.post("/refresh", refreshAccessToken);
-router.post("/logout", logout);
+// 🗄️ Fake DB (replace with MongoDB model)
+const users = [];
 
-router.get("/2fa/setup", authMiddleware, generate2FA);
-router.post("/2fa/verify", authMiddleware, verify2FA);
-router.post("/2fa/login", verifyLogin2FA);
+// 🔹 REGISTER
+router.post("/register", async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const userExists = users.find(u => u.email === email);
+    if (userExists) {
+      return res.status(400).json({ message: "User already exists" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = { email, password: hashedPassword };
+    users.push(user);
+
+    res.status(201).json({ message: "User registered successfully" });
+
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// 🔹 LOGIN
+router.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const user = users.find(u => u.email === email);
+    if (!user) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+
+    const token = jwt.sign(
+      { email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+
+    res.json({ token });
+
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
 export default router;

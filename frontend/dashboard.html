@@ -2,18 +2,25 @@
 <html>
 <head>
   <title>Dashboard</title>
-  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="container">
-  <h2>Welcome 🎉</h2>
+<h2 id="welcome">Welcome!</h2>
+<button onclick="logout()">Logout</button>
 
-  <p id="welcomeMsg">You are successfully logged in!</p>
+<script>
+  const token = localStorage.getItem("token");
 
-  <button onclick="logout()">Logout</button>
-</div>
+  // 🔐 Protect route
+  if (!token) {
+    window.location.href = "index.html";
+  }
 
-<script src="script.js"></script>
+  function logout() {
+    localStorage.removeItem("token");
+    window.location.href = "index.html";
+  }
+</script>
+
 </body>
 </html>

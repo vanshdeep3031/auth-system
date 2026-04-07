@@ -1,53 +1,41 @@
 import express from "express";
 import mongoose from "mongoose";
-import dotenv from "dotenv";
 import cors from "cors";
-import helmet from "helmet";
-import rateLimit from "express-rate-limit";
+import dotenv from "dotenv";
 
-import authRoutes from "./routes/authRoutes.js";
-import protectedRoutes from "./routes/protectedRoutes.js";
+import authRoutes from "./routes/auth.js";
 
 dotenv.config();
 
 const app = express();
 
-// 🔐 Security Middlewares
-app.use(helmet());
-app.use(cors());
+// ✅ ENV check
+if (!process.env.MONGO_URI || !process.env.JWT_SECRET) {
+  console.error("Missing ENV variables");
+  process.exit(1);
+}
 
-// 🚫 Rate Limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 mins
-  max: 100
-});
-app.use(limiter);
-
-// 📦 Body Parser
+// ✅ Middleware
 app.use(express.json());
 
-// 🌐 Root Route (IMPORTANT)
+app.use(cors({
+  origin: "http://127.0.0.1:5500", // change to Netlify URL later
+  credentials: true
+}));
+
+// ✅ Routes
+app.use("/api/auth", authRoutes);
+
 app.get("/", (req, res) => {
   res.send("API is running 🚀");
 });
 
-// 🔗 Routes
-app.use("/api/auth", authRoutes);
-app.use("/api/protected", protectedRoutes);
-
-// ❌ Handle 404
-app.use((req, res) => {
-  res.status(404).json({ message: "Route not found" });
-});
-
-// 🗄️ MongoDB Connection
+// ✅ DB connect
 mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log("MongoDB Connected"))
-  .catch(err => console.log("Mongo Error:", err));
-
-// 🚀 Server Start
-const PORT = process.env.PORT || 8000;
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+  .then(() => {
+    console.log("MongoDB connected");
+    app.listen(process.env.PORT || 8000, () => {
+      console.log("Server running");
+    });
+  })
+  .catch(err => console.log(err));
