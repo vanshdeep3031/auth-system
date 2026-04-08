@@ -1,25 +1,21 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <title>Dashboard</title>
-</head>
 <body>
 
-<h2 id="welcome">Welcome!</h2>
+<h2>Welcome to Dashboard 🎉</h2>
 <button onclick="logout()">Logout</button>
 
 <script>
-  const token = localStorage.getItem("token");
+const token = localStorage.getItem("token");
 
-  // 🔐 Protect route
-  if (!token) {
-    window.location.href = "index.html";
-  }
+if (!token) {
+  window.location.href = "index.html";
+}
 
-  function logout() {
-    localStorage.removeItem("token");
-    window.location.href = "index.html";
-  }
+function logout() {
+  localStorage.removeItem("token");
+  window.location.href = "index.html";
+}
 </script>
 
 </body>

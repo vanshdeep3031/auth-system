@@ -1,25 +1,37 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <title>Login</title>
-  <link rel="stylesheet" href="style.css">
-</head>
 <body>
 
-<div class="container">
-  <h2>Login</h2>
+<h2>Login</h2>
 
-  <input id="email" placeholder="Email"><br>
-  <input id="password" type="password" placeholder="Password"><br>
+<input id="email" placeholder="Email"><br><br>
+<input id="password" type="password" placeholder="Password"><br><br>
 
-  <button onclick="login()">Login</button>
+<button onclick="login()">Login</button>
 
-  <p id="message"></p>
+<script>
+async function login() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
 
-  <p>Don't have an account?</p>
-  <a href="register.html">Register here</a>
-</div>
+  const res = await fetch("http://localhost:8000/api/auth/login", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ email, password })
+  });
 
-<script src="script.js"></script>
+  const data = await res.json();
+
+  if (data.token) {
+    localStorage.setItem("token", data.token);
+    window.location.href = "dashboard.html";
+  } else {
+    alert(data.message);
+  }
+}
+</script>
+
 </body>
 </html>
